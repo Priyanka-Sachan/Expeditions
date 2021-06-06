@@ -1,7 +1,10 @@
+import 'package:expeditions/HomePage.dart';
 import 'package:expeditions/Providers/Places.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
+import 'package:expeditions/UI/Screens/ChatScreen.dart';
 import 'package:expeditions/UI/Screens/PlaceDetailsScreen.dart';
 import 'package:expeditions/UI/Screens/PlacesOverviewScreen.dart';
+import 'package:expeditions/UI/Screens/ProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +19,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => Places(),
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Expeditions',
         theme: ThemeData(
             fontFamily: 'Raleway',
             backgroundColor: Color(0xfff5e6ca),
@@ -43,12 +46,14 @@ class MyApp extends StatelessWidget {
             }),
             accentColor: Color(0xfff54748),
             iconTheme: IconThemeData(color: Colors.black)),
-        home: PlacesOverviewScreen(),
+        home: HomePage(),
         // initialRoute: PlacesOverviewScreen.id,
         routes: {
           PlacesOverviewScreen.id: (ctx) => PlacesOverviewScreen(),
           AddPlaceScreen.id: (ctx) => AddPlaceScreen(),
-          PlaceDetailsScreen.id: (ctx) => PlaceDetailsScreen()
+          PlaceDetailsScreen.id: (ctx) => PlaceDetailsScreen(),
+          ChatScreen.id: (ctx) => ChatScreen(),
+          ProfileScreen.id: (ctx) => ProfileScreen()
         },
       ),
     );

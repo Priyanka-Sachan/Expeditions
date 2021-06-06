@@ -2,6 +2,7 @@ import 'package:expeditions/Providers/Places.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
 import 'package:expeditions/UI/Screens/PlaceDetailsScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 class PlacesOverviewScreen extends StatelessWidget {
@@ -20,8 +21,15 @@ class PlacesOverviewScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(AddPlaceScreen.id),
+              onPressed: () {
+                // Navigator.of(context).pushNamed(AddPlaceScreen.id);
+                pushNewScreen(
+                  context,
+                  screen: AddPlaceScreen(),
+                  withNavBar: false, // OPTIONAL VALUE. True by default.
+                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                );
+              },
               icon: Icon(
                 Icons.add,
                 color: Theme.of(context).iconTheme.color,
@@ -52,9 +60,19 @@ class PlacesOverviewScreen extends StatelessWidget {
                             title: Text(places.items[i].title),
                             subtitle: Text(places.items[i].location.address),
                             onTap: () {
-                              Navigator.of(context).pushNamed(
-                                  PlaceDetailsScreen.id,
-                                  arguments: places.items[i].id);
+                              // Navigator.of(context).pushNamed(
+                              //     PlaceDetailsScreen.id,
+                              //     arguments: places.items[i].id);
+                              pushNewScreenWithRouteSettings(
+                                context,
+                                settings: RouteSettings(
+                                    name: PlaceDetailsScreen.id,
+                                    arguments: places.items[i].id),
+                                screen: PlaceDetailsScreen(),
+                                withNavBar: true,
+                                pageTransitionAnimation:
+                                    PageTransitionAnimation.cupertino,
+                              );
                             },
                           );
                         },
