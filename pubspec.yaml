@@ -23,7 +23,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  provider: ^5.0.0
+  image_picker: ^0.8.0+1
+  path: ^1.8.0
+  path_provider: ^2.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -43,6 +46,14 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: Dancing Script
+      fonts:
+        - asset: asset/fonts/DancingScript.ttf
+    - family: Raleway
+      fonts:
+          - asset: asset/fonts/Raleway.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
