@@ -1,5 +1,6 @@
 import 'package:expeditions/Providers/Places.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
+import 'package:expeditions/UI/Screens/PlaceDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +51,11 @@ class PlacesOverviewScreen extends StatelessWidget {
                             ),
                             title: Text(places.items[i].title),
                             subtitle: Text(places.items[i].location.address),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.of(context).pushNamed(
+                                  PlaceDetailsScreen.id,
+                                  arguments: places.items[i].id);
+                            },
                           );
                         },
                       ),
