@@ -49,6 +49,7 @@ class PlacesOverviewScreen extends StatelessWidget {
                               backgroundImage: FileImage(places.items[i].image),
                             ),
                             title: Text(places.items[i].title),
+                            subtitle: Text(places.items[i].location.address),
                             onTap: () {},
                           );
                         },

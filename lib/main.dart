@@ -1,6 +1,6 @@
 import 'package:expeditions/Providers/Places.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
-import 'package:expeditions/UI/Screens/PlacesOverview.dart';
+import 'package:expeditions/UI/Screens/PlacesOverviewScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

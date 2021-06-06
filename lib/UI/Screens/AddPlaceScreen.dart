@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:expeditions/Models/Place.dart';
 import 'package:expeditions/Providers/Places.dart';
-import 'package:expeditions/UI/Screens/PlacesOverview.dart';
+import 'package:expeditions/UI/Screens/PlacesOverviewScreen.dart';
 import 'package:expeditions/UI/Widgets/ImageInput.dart';
+import 'package:expeditions/UI/Widgets/LocationInput.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,15 +18,20 @@ class AddPlaceScreen extends StatefulWidget {
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _titleController = TextEditingController();
   File _pickedImage = File('');
+  Location _pickedLocation=Location(latitude: -1,longitude: -1,address: '');
 
   void _selectImage(File pickedImage) {
     _pickedImage = pickedImage;
   }
 
+  void _selectPlace(double latitude,double longitude) {
+    _pickedLocation = Location(latitude: latitude,longitude: longitude,address: '');
+  }
+
   void _addPlace() {
-    if (_titleController.text.isEmpty || _pickedImage.path.isEmpty) return;
+    if (_titleController.text.isEmpty || _pickedImage.path.isEmpty || _pickedLocation.latitude<0 || _pickedLocation.longitude<0) return;
     Provider.of<Places>(context, listen: false)
-        .addPlace(_titleController.text, _pickedImage);
+        .addPlace(_titleController.text, _pickedImage,_pickedLocation);
   }
 
   @override
@@ -35,7 +42,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: Theme.of(context).appBarTheme.elevation,
         title: Text(
-          'Expeditions',
+          'Add Expedition',
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
       ),
@@ -59,6 +66,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       height: 8,
                     ),
                     ImageInput(_selectImage),
+                    SizedBox(height: 8,),
+                    LocationInput(selectPlace: _selectPlace)
                   ],
                 ),
               ),

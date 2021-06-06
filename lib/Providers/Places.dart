@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:expeditions/Helpers/DBHelpers.dart';
+import 'package:expeditions/Helpers/LocationHelper.dart';
 import 'package:expeditions/Models/Place.dart';
 import 'package:flutter/foundation.dart';
 
@@ -18,23 +19,36 @@ class Places with ChangeNotifier {
             id: item['id'],
             title: item['title'],
             image: File(item['image']),
-            location: Location(longitude: 0, latitude: 0, address: '')))
+            location: Location(
+                longitude: item['loc_lon'],
+                latitude: item['loc_lat'],
+                address: item['address'])))
         .toList();
     notifyListeners();
   }
 
-  void addPlace(String title, File image) {
+  Future<void> addPlace(String title, File image, Location location) async {
+    String address =
+        await LocationHelper.getAddress(location.latitude, location.longitude);
+    Location newLocation = Location(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        address: address);
     final newPlace = Place(
         id: DateTime.now().toString(),
         title: title,
-        location: Location(latitude: 0, longitude: 0, address: ''),
+        location: newLocation,
         image: image);
     _items.add(newPlace);
+    print(newPlace.toString());
     notifyListeners();
     DBHelpers.insert('places', {
       'id': newPlace.id,
       'title': newPlace.title,
-      'image': newPlace.image.path
+      'image': newPlace.image.path,
+      'loc_lat': newPlace.location.latitude,
+      'loc_lon': newPlace.location.longitude,
+      'address': newPlace.location.address
     });
   }
 }

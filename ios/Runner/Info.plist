@@ -28,6 +28,10 @@
     <string>We need camera to add your images in your places.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>We need microphone to add your videos in your places.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to add your location in your places</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need your location to add your location in your places</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

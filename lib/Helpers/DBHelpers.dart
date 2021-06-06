@@ -7,7 +7,7 @@ class DBHelpers {
     return sql.openDatabase(path.join(dbPath, 'expeditions'),
         onCreate: (db, version) {
       return db.execute(
-          'CREATE TABLE places(id TEXT PRIMARY KEY, title TEXT,image TEXT)');
+          'CREATE TABLE places(id TEXT PRIMARY KEY, title TEXT,image TEXT,loc_lat REAL, loc_lon REAL, address TEXT)');
     }, version: 1);
   }
 
