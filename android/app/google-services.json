@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "604003863623",
+    "project_id": "expeditions-caf06",
+    "storage_bucket": "expeditions-caf06.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604003863623:android:edbf5752957038956d7562",
+        "android_client_info": {
+          "package_name": "com.example.expeditions"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "604003863623-um8r5hhtvgs6hpmuru7g32ah78cl88a5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtUNfZ08ShFzFvXBeAELHoZao8rJBuXJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "604003863623-um8r5hhtvgs6hpmuru7g32ah78cl88a5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

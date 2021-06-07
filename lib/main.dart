@@ -1,14 +1,19 @@
 import 'package:expeditions/HomePage.dart';
 import 'package:expeditions/Providers/Places.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
+import 'package:expeditions/UI/Screens/AuthScreen.dart';
 import 'package:expeditions/UI/Screens/ChatScreen.dart';
 import 'package:expeditions/UI/Screens/PlaceDetailsScreen.dart';
 import 'package:expeditions/UI/Screens/PlacesOverviewScreen.dart';
 import 'package:expeditions/UI/Screens/ProfileScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -46,9 +51,17 @@ class MyApp extends StatelessWidget {
             }),
             accentColor: Color(0xfff54748),
             iconTheme: IconThemeData(color: Colors.black)),
-        home: HomePage(),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, userSnapshot) {
+            if (userSnapshot.hasData) return HomePage();
+            return AuthScreen();
+          },
+        ),
         // initialRoute: PlacesOverviewScreen.id,
         routes: {
+          AuthScreen.id: (ctx) => AuthScreen(),
+          HomePage.id: (ctx) => HomePage(),
           PlacesOverviewScreen.id: (ctx) => PlacesOverviewScreen(),
           AddPlaceScreen.id: (ctx) => AddPlaceScreen(),
           PlaceDetailsScreen.id: (ctx) => PlaceDetailsScreen(),
