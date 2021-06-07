@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
               900: Color(0xff343f56),
             }),
             accentColor: Color(0xfff54748),
-            iconTheme: IconThemeData(color: Colors.black)),
+            iconTheme: IconThemeData(color: Color(0xff343f56))),
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {

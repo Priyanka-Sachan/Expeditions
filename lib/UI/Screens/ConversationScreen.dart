@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,13 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _sendMessageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _sendMessageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +41,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
             .collection("chat")
             .doc(chatId)
             .collection("messages")
+            .orderBy('timestamp')
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -43,16 +52,76 @@ class _ConversationScreenState extends State<ConversationScreen> {
           if (streamSnapshot.hasError)
             return Center(
                 child: Text('ERROR....LETS RUMMAGE AROUND TO FIX IT UP...'));
-          return ListView(
-            children:
-                streamSnapshot.data!.docs.map((DocumentSnapshot document) {
-              return ListTile(
-                title: Text(document.get('text')),
-              );
-            }).toList(),
-          );
+          final messages = streamSnapshot.data!.docs;
+          return Column(children: [
+            Expanded(
+              child: ListView.builder(
+                  itemCount: messages.length,
+                  itemBuilder: (ctx, i) {
+                    final message = Message(
+                        sender: messages[i].get('sender'),
+                        type: messages[i].get('type'),
+                        text: messages[i].get('text'),
+                        imageUrl: messages[i].get('imageUrl'),
+                        timeStamp: messages[i].get('timestamp').toString());
+                    return Card(
+                      child: Column(
+                        children: [
+                          Text(message.text),
+                          Text(message.sender == messenger.uid
+                              ? messenger.username
+                              : 'ME'),
+                        ],
+                      ),
+                    );
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _sendMessageController,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor, width: 2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        sendMessage(chatId);
+                      },
+                      icon: Icon(
+                        Icons.check_circle,
+                        size: 32,
+                      ))
+                ],
+              ),
+            ),
+          ]);
         },
       ),
     );
+  }
+
+  void sendMessage(String chatId) {
+    if (_sendMessageController.text.trim().isNotEmpty)
+      _firestore.collection("chat").doc(chatId).collection("messages").add({
+        'sender': 'fOgyiBZLcWU4lITRE4PAlkDO2lC3',
+        'type': 0,
+        'text': _sendMessageController.text.trim(),
+        'imageUrl': '',
+        'timestamp': DateTime.now()
+      });
+    _sendMessageController.clear();
   }
 }

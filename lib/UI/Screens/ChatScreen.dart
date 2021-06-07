@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
 import 'package:expeditions/UI/Screens/ConversationScreen.dart';
 import 'package:flutter/material.dart';
@@ -44,19 +45,20 @@ class _ChatScreenState extends State<ChatScreen> {
             return ListView(
                 children:
                     streamSnapshot.data!.docs.map((DocumentSnapshot document) {
-              final members = document.get('members');
-              final userId = members[0] == _uid ? members[1] : members[0];
               return FutureBuilder(
-                future: getUser(userId),
+                future: getChatInfo(document),
                 builder: (ctx, futureSnapshot) {
                   if (futureSnapshot.connectionState == ConnectionState.waiting)
                     return Center(
                       child: LinearProgressIndicator(),
                     );
                   if (futureSnapshot.hasError) return SizedBox();
-                  final messenger = futureSnapshot.data as User;
+                  final data = futureSnapshot.data as Map<String, dynamic>;
+                  final messenger = data['messenger'] as User;
+                  final lastMessage = data['message'] as Message;
                   return ListTile(
                     title: Text(messenger.username),
+                    subtitle: Text(lastMessage.text),
                     onTap: () {
                       pushNewScreenWithRouteSettings(
                         context,
@@ -65,7 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             name: ConversationScreen.id,
                             arguments: {
                               'chat_id': document.id,
-                              'messenger': futureSnapshot.data
+                              'messenger': messenger
                             }),
                         withNavBar: false,
                         pageTransitionAnimation:
@@ -80,11 +82,36 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Future<Map<String, dynamic>> getChatInfo(DocumentSnapshot document) async {
+    final members = document.get('members');
+    final messengerId = members[0] == _uid ? members[1] : members[0];
+    final messenger = await getUser(messengerId);
+    final message = await getLastMessage(document.id);
+    return {'messenger': messenger, 'message': message};
+  }
+
   Future<User> getUser(String uid) async {
     final userData = await _firestore.collection("users").doc(uid).get();
     final user = User(
         uid: uid, username: userData['username'], emailId: userData['email']);
-    print(user.toString());
     return user;
+  }
+
+  Future<Message> getLastMessage(String chatId) async {
+    final data = await _firestore
+        .collection("chat")
+        .doc(chatId)
+        .collection("messages")
+        .orderBy('timestamp')
+        .limit(1)
+        .get();
+    final messageData = data.docs.last.data();
+    final message = Message(
+        sender: messageData['sender'],
+        type: messageData['type'],
+        text: messageData['text'],
+        imageUrl: messageData['imageUrl'].toString(),
+        timeStamp: messageData['timestamp'].toString());
+    return message;
   }
 }
