@@ -63,14 +63,28 @@ class _ConversationScreenState extends State<ConversationScreen> {
                         type: messages[i].get('type'),
                         text: messages[i].get('text'),
                         imageUrl: messages[i].get('imageUrl'),
-                        timeStamp: messages[i].get('timestamp').toString());
-                    return Card(
+                        timeStamp: messages[i].get('timestamp').toDate());
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Column(
+                        crossAxisAlignment: message.sender == messenger.uid
+                            ? CrossAxisAlignment.start
+                            : CrossAxisAlignment.end,
                         children: [
-                          Text(message.text),
-                          Text(message.sender == messenger.uid
-                              ? messenger.username
-                              : 'ME'),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                message.text,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            color: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          Text(message.timeStamp.toLocal().toString()),
                         ],
                       ),
                     );

@@ -3,7 +3,7 @@ class Message {
   final int type;
   final String text;
   final String imageUrl;
-  final String timeStamp;
+  final DateTime timeStamp;
 
   Message(
       {required this.sender,

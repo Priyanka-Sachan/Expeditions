@@ -56,25 +56,39 @@ class _ChatScreenState extends State<ChatScreen> {
                   final data = futureSnapshot.data as Map<String, dynamic>;
                   final messenger = data['messenger'] as User;
                   final lastMessage = data['message'] as Message;
-                  return ListTile(
-                    title: Text(messenger.username),
-                    subtitle: Text(lastMessage.text),
-                    onTap: () {
-                      pushNewScreenWithRouteSettings(
-                        context,
-                        screen: ConversationScreen(),
-                        settings: RouteSettings(
-                            name: ConversationScreen.id,
-                            arguments: {
-                              'chat_id': document.id,
-                              'messenger': messenger
-                            }),
-                        withNavBar: false,
-                        pageTransitionAnimation:
-                            PageTransitionAnimation.cupertino,
-                      );
-                    },
-                  );
+                  return GestureDetector(
+                      child: Card(
+                        color: Theme.of(context).backgroundColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            side: BorderSide(
+                                width: 2,
+                                color: Theme.of(context).primaryColor)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Text(messenger.username,style: TextStyle(fontSize: 24),),
+                              Text(lastMessage.text),
+                            ],
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        pushNewScreenWithRouteSettings(
+                          context,
+                          screen: ConversationScreen(),
+                          settings: RouteSettings(
+                              name: ConversationScreen.id,
+                              arguments: {
+                                'chat_id': document.id,
+                                'messenger': messenger
+                              }),
+                          withNavBar: false,
+                          pageTransitionAnimation:
+                              PageTransitionAnimation.cupertino,
+                        );
+                      });
                 },
               );
             }).toList());
@@ -110,8 +124,8 @@ class _ChatScreenState extends State<ChatScreen> {
         sender: messageData['sender'],
         type: messageData['type'],
         text: messageData['text'],
-        imageUrl: messageData['imageUrl'].toString(),
-        timeStamp: messageData['timestamp'].toString());
+        imageUrl: messageData['imageUrl'],
+        timeStamp: messageData['timestamp'].toDate());
     return message;
   }
 }
