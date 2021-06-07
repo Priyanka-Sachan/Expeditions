@@ -2,14 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/UI/Widgets/AuthForm.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
+
+import '../../HomePage.dart';
 
 class AuthScreen extends StatelessWidget {
   static final id = 'auth-screen';
 
   final _auth = FirebaseAuth.instance;
 
-  void _signUp(String username, String email, String password) async {
+  void _signUp(BuildContext context, String username, String email,
+      String password) async {
     UserCredential userCredential;
     try {
       userCredential = await _auth.createUserWithEmailAndPassword(
@@ -18,22 +20,26 @@ class AuthScreen extends StatelessWidget {
           .collection("users")
           .doc(userCredential.user!.uid)
           .set({'username': username, 'email': email});
-    } on PlatformException catch (e) {
-      String message = 'An error occurred, please check your credentials.';
-      if (e.message != null) message = e.message!;
-      print(message);
+      Navigator.of(context).pushNamed(HomePage.id);
+    } catch (e) {
+      print('on_auth:$e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+      ));
     }
   }
 
-  void _signIn(String email, String password) async {
+  void _signIn(BuildContext context, String email, String password) async {
     UserCredential userCredential;
     try {
       userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-    } on PlatformException catch (e) {
-      String message = 'An error occurred, please check your credentials.';
-      if (e.message != null) message = e.message!;
-      print(message);
+      Navigator.of(context).pushNamed(HomePage.id);
+    } catch (e) {
+      print('on_auth:$e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+      ));
     }
   }
 

@@ -1,11 +1,13 @@
-import 'package:expeditions/HomePage.dart';
 import 'package:flutter/material.dart';
 
 enum AuthMode { SignUp, SignIn }
 
 class AuthForm extends StatefulWidget {
-  final void Function(String username, String email, String password) signUp;
-  final void Function(String username, String password) signIn;
+  final void Function(
+          BuildContext context, String username, String email, String password)
+      signUp;
+  final void Function(BuildContext context, String username, String password)
+      signIn;
 
   AuthForm({required this.signUp, required this.signIn});
 
@@ -26,11 +28,17 @@ class _AuthFormState extends State<AuthForm> {
     final isValid = _formKey.currentState!.validate();
     if (isValid) _formKey.currentState!.save();
     FocusScope.of(context).unfocus();
-    if (_authMode == AuthMode.SignUp)
-      widget.signUp(_username, _email, _password);
-    else
-      widget.signIn(_email, _password);
-    Navigator.of(context).pushNamed(HomePage.id);
+    try {
+      if (_authMode == AuthMode.SignUp)
+        widget.signUp(context, _username, _email, _password);
+      else
+        widget.signIn(context, _email, _password);
+    } catch (e) {
+      print('on_form:$e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+      ));
+    }
   }
 
   void _switchAuthMode() {
@@ -82,7 +90,8 @@ class _AuthFormState extends State<AuthForm> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   validator: (value) {
-                    if (value!.trim().isEmpty) return 'Please enter the email id.';
+                    if (value!.trim().isEmpty)
+                      return 'Please enter the email id.';
                     return null;
                   },
                   onSaved: (value) {
@@ -95,7 +104,8 @@ class _AuthFormState extends State<AuthForm> {
                     textInputAction: TextInputAction.done,
                     obscureText: true,
                     validator: (value) {
-                      if (value!.trim().isEmpty) return 'Please enter the password.';
+                      if (value!.trim().isEmpty)
+                        return 'Please enter the password.';
                       if (value.trim().length < 8)
                         return 'Password should be minimum 8 characters long.';
                       return null;
