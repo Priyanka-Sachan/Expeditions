@@ -1,12 +1,53 @@
 import 'package:expeditions/UI/Screens/ChatScreen.dart';
 import 'package:expeditions/UI/Screens/PlacesOverviewScreen.dart';
 import 'package:expeditions/UI/Screens/ProfileScreen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   static final id = 'home-page';
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final messaging = FirebaseMessaging.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    messaging.subscribeToTopic("messaging");
+    messaging.getToken().then((value) {
+      print(value);
+    });
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      print("message recieved");
+      print(event.notification!.body);
+      print(event.data.values);
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Notification"),
+              content: Text(event.notification!.body!),
+              actions: [
+                TextButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print('Message clicked!');
+    });
+  }
 
   PersistentTabController _controller =
       PersistentTabController(initialIndex: 1);
