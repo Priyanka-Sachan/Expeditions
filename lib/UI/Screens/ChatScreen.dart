@@ -20,7 +20,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> getCurrentUser() async {
     final uid = _firebaseAuth.currentUser!.uid;
-    _user = await getUser(uid);
+    _user = await User.getUser(_firestore, uid);
     setState(() {});
   }
 
@@ -137,23 +137,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<Map<String, dynamic>> getChatInfo(DocumentSnapshot document) async {
     final members = document.get('members');
     final messengerId = members[0] == _user.uid ? members[1] : members[0];
-    final messenger = await getUser(messengerId);
-    final message = await getLastMessage(document.id);
+    final messenger = await User.getUser(_firestore, messengerId);
+    final message = await getLastMessage(_firestore, document.id);
     return {'messenger': messenger, 'message': message};
   }
 
-  Future<User> getUser(String uid) async {
-    final userData = await _firestore.collection("users").doc(uid).get();
-    final user = User(
-        uid: uid,
-        username: userData['username'],
-        emailId: userData['email'],
-        imageUrl: userData['imageUrl']);
-    return user;
-  }
-
-  Future<Message> getLastMessage(String chatId) async {
-    final data = await _firestore
+  Future<Message> getLastMessage(
+      FirebaseFirestore firestore, String chatId) async {
+    final data = await firestore
         .collection("chat")
         .doc(chatId)
         .collection("messages")
