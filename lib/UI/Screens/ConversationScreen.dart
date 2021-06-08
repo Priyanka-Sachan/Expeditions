@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ConversationScreen extends StatefulWidget {
   static final id = 'conversation-screen';
@@ -24,8 +25,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final chatId = args['chat_id'];
+    final chatId = args['chat_id'] as String;
+    final currentUser = args['current_user'] as User;
     final messenger = args['messenger'] as User;
+    final dateFormat = new DateFormat('dd-MM-yyyy hh:mm a');
+
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -41,7 +45,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
             .collection("chat")
             .doc(chatId)
             .collection("messages")
-            .orderBy('timestamp')
+            .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -56,6 +60,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           return Column(children: [
             Expanded(
               child: ListView.builder(
+                  reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (ctx, i) {
                     final message = Message(
@@ -66,25 +71,55 @@ class _ConversationScreenState extends State<ConversationScreen> {
                         timeStamp: messages[i].get('timestamp').toDate());
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        crossAxisAlignment: message.sender == messenger.uid
-                            ? CrossAxisAlignment.start
-                            : CrossAxisAlignment.end,
+                      child: Row(
+                        mainAxisAlignment: message.sender == currentUser.uid
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                message.text,
-                                style: TextStyle(color: Colors.white),
+                          message.sender != currentUser.uid
+                              ? CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(messenger.imageUrl),
+                                  radius: 24,
+                                )
+                              : SizedBox(),
+                          Column(
+                            crossAxisAlignment:
+                                message.sender == currentUser.uid
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width *
+                                            0.5),
+                                child: Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      message.text,
+                                      softWrap: true,
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  color: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
                               ),
-                            ),
-                            color: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
+                              Text(dateFormat.format(message.timeStamp))
+                            ],
                           ),
-                          Text(message.timeStamp.toLocal().toString()),
+                          message.sender == currentUser.uid
+                              ? CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(currentUser.imageUrl),
+                                  radius: 24,
+                                )
+                              : SizedBox(),
                         ],
                       ),
                     );
@@ -112,7 +147,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   ),
                   IconButton(
                       onPressed: () {
-                        sendMessage(chatId);
+                        sendMessage(chatId, currentUser.uid);
                       },
                       icon: Icon(
                         Icons.check_circle,
@@ -127,10 +162,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
     );
   }
 
-  void sendMessage(String chatId) {
+  void sendMessage(String chatId, String senderId) {
     if (_sendMessageController.text.trim().isNotEmpty)
       _firestore.collection("chat").doc(chatId).collection("messages").add({
-        'sender': 'fOgyiBZLcWU4lITRE4PAlkDO2lC3',
+        'sender': senderId,
         'type': 0,
         'text': _sendMessageController.text.trim(),
         'imageUrl': '',

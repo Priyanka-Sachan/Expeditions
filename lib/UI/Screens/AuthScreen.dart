@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/UI/Widgets/AuthForm.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -10,19 +13,24 @@ class AuthScreen extends StatelessWidget {
 
   final _auth = FirebaseAuth.instance;
 
-  void _signUp(BuildContext context, String username, String email,
+  void _signUp(BuildContext context, String username, File image, String email,
       String password) async {
     UserCredential userCredential;
     try {
       userCredential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('users')
+          .child(userCredential.user!.uid + '.jpg');
+      await storageRef.putFile(image);
+      final imageUrl = await storageRef.getDownloadURL();
       await FirebaseFirestore.instance
           .collection("users")
           .doc(userCredential.user!.uid)
-          .set({'username': username, 'email': email});
+          .set({'username': username, 'email': email, 'imageUrl': imageUrl});
       Navigator.of(context).pushNamed(HomePage.id);
     } catch (e) {
-      print('on_auth:$e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.toString()),
       ));

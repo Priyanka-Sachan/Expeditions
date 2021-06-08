@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
 import 'package:expeditions/UI/Screens/ConversationScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
@@ -14,7 +15,20 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _uid = 'fOgyiBZLcWU4lITRE4PAlkDO2lC3';
+  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  late User _user;
+
+  Future<void> getCurrentUser() async {
+    final uid = _firebaseAuth.currentUser!.uid;
+    _user = await getUser(uid);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    getCurrentUser();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: StreamBuilder(
           stream: _firestore
               .collection("chat")
-              .where('members', arrayContains: _uid)
+              .where('members', arrayContains: _firebaseAuth.currentUser!.uid)
               .snapshots(),
           builder: (BuildContext context,
               AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -60,16 +74,39 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: Card(
                         color: Theme.of(context).backgroundColor,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                            borderRadius: BorderRadius.horizontal(
+                                left: Radius.circular(32)),
                             side: BorderSide(
                                 width: 2,
                                 color: Theme.of(context).primaryColor)),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Column(
+                          child: Row(
                             children: [
-                              Text(messenger.username,style: TextStyle(fontSize: 24),),
-                              Text(lastMessage.text),
+                              CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(messenger.imageUrl),
+                                radius: 24,
+                              ),
+                              SizedBox(
+                                width: 16,
+                              ),
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      messenger.username,
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                    Text(
+                                      lastMessage.text,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -82,6 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               name: ConversationScreen.id,
                               arguments: {
                                 'chat_id': document.id,
+                                'current_user': _user,
                                 'messenger': messenger
                               }),
                           withNavBar: false,
@@ -98,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<Map<String, dynamic>> getChatInfo(DocumentSnapshot document) async {
     final members = document.get('members');
-    final messengerId = members[0] == _uid ? members[1] : members[0];
+    final messengerId = members[0] == _user.uid ? members[1] : members[0];
     final messenger = await getUser(messengerId);
     final message = await getLastMessage(document.id);
     return {'messenger': messenger, 'message': message};
@@ -107,7 +145,10 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<User> getUser(String uid) async {
     final userData = await _firestore.collection("users").doc(uid).get();
     final user = User(
-        uid: uid, username: userData['username'], emailId: userData['email']);
+        uid: uid,
+        username: userData['username'],
+        emailId: userData['email'],
+        imageUrl: userData['imageUrl']);
     return user;
   }
 
@@ -116,7 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .collection("chat")
         .doc(chatId)
         .collection("messages")
-        .orderBy('timestamp')
+        .orderBy('timestamp', descending: true)
         .limit(1)
         .get();
     final messageData = data.docs.last.data();

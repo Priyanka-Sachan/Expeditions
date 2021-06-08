@@ -1,11 +1,13 @@
+import 'dart:io';
+
+import 'package:expeditions/UI/Widgets/AuthImagePicker.dart';
 import 'package:flutter/material.dart';
 
 enum AuthMode { SignUp, SignIn }
 
 class AuthForm extends StatefulWidget {
-  final void Function(
-          BuildContext context, String username, String email, String password)
-      signUp;
+  final void Function(BuildContext context, String username, File image,
+      String email, String password) signUp;
   final void Function(BuildContext context, String username, String password)
       signIn;
 
@@ -23,18 +25,26 @@ class _AuthFormState extends State<AuthForm> {
   String _username = '';
   String _email = '';
   String _password = '';
+  File _image = File('');
+
+  void _pickImage(File image) async {
+    _image = image;
+  }
 
   Future<void> _submit() async {
+    if (_authMode == AuthMode.SignUp && _image.path.isEmpty)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Please select a profile image.'),
+      ));
     final isValid = _formKey.currentState!.validate();
     if (isValid) _formKey.currentState!.save();
     FocusScope.of(context).unfocus();
     try {
       if (_authMode == AuthMode.SignUp)
-        widget.signUp(context, _username, _email, _password);
+        widget.signUp(context, _username, _image, _email, _password);
       else
         widget.signIn(context, _email, _password);
     } catch (e) {
-      print('on_form:$e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.toString()),
       ));
@@ -68,6 +78,9 @@ class _AuthFormState extends State<AuthForm> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
+                _authMode == AuthMode.SignUp
+                    ? AuthImagePicker(pickImage: _pickImage)
+                    : SizedBox(),
                 _authMode == AuthMode.SignUp
                     ? TextFormField(
                         decoration: InputDecoration(labelText: 'Username'),
