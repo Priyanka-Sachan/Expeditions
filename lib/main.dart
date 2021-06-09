@@ -60,6 +60,8 @@ class MyApp extends StatelessWidget {
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting)
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
             if (userSnapshot.hasData) return HomePage();
             return AuthScreen();
           },
