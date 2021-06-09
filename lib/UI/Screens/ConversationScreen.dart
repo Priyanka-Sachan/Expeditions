@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class ConversationScreen extends StatefulWidget {
@@ -55,8 +56,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
             );
           if (streamSnapshot.hasError)
             return Center(
-                child: Text('ERROR....LETS RUMMAGE AROUND TO FIX IT UP...'));
+                child: SvgPicture.asset('assets/images/bug.svg',
+                    semanticsLabel: 'Bug'));
           final messages = streamSnapshot.data!.docs;
+          if (messages.length == 0)
+            return Center(
+                child: SvgPicture.asset('assets/images/say_hi.svg',
+                    semanticsLabel: 'Empty conversation'));
           return Column(children: [
             Expanded(
               child: ListView.builder(

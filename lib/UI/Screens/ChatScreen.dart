@@ -5,6 +5,7 @@ import 'package:expeditions/UI/Screens/ConversationScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChatScreen extends StatefulWidget {
   static final id = 'chat-screen';
@@ -55,7 +56,12 @@ class _ChatScreenState extends State<ChatScreen> {
               );
             if (streamSnapshot.hasError)
               return Center(
-                  child: Text('ERROR....LETS RUMMAGE AROUND TO FIX IT UP...'));
+                  child: SvgPicture.asset('assets/images/bug.svg',
+                      semanticsLabel: 'Bug'));
+            if (streamSnapshot.data!.docs.length == 0)
+              return Center(
+                  child: SvgPicture.asset('assets/images/no_chats.svg',
+                      semanticsLabel: 'No chats'));
             return ListView(
                 children:
                     streamSnapshot.data!.docs.map((DocumentSnapshot document) {
@@ -135,11 +141,20 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<Map<String, dynamic>> getChatInfo(DocumentSnapshot document) async {
-    final members = document.get('members');
-    final messengerId = members[0] == _user.uid ? members[1] : members[0];
-    final messenger = await User.getUser(_firestore, messengerId);
-    final message = await getLastMessage(_firestore, document.id);
-    return {'messenger': messenger, 'message': message};
+    try {
+      final members = document.get('members');
+      final messengerId = members[0] == _firebaseAuth.currentUser!.uid
+          ? members[1]
+          : members[0];
+      print(messengerId);
+      final messenger = await User.getUser(_firestore, messengerId);
+      print(messenger.username);
+      final message = await getLastMessage(_firestore, document.id);
+      print(message.text);
+      return {'messenger': messenger, 'message': message};
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 
   Future<Message> getLastMessage(
