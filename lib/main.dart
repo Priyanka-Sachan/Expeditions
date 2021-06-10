@@ -1,5 +1,6 @@
 import 'package:expeditions/HomePage.dart';
 import 'package:expeditions/Providers/Places.dart';
+import 'package:expeditions/UI/Screens/AddFriendScreen.dart';
 import 'package:expeditions/UI/Screens/AddPlaceScreen.dart';
 import 'package:expeditions/UI/Screens/AuthScreen.dart';
 import 'package:expeditions/UI/Screens/ChatScreen.dart';
@@ -74,7 +75,8 @@ class MyApp extends StatelessWidget {
           AddPlaceScreen.id: (ctx) => AddPlaceScreen(),
           PlaceDetailsScreen.id: (ctx) => PlaceDetailsScreen(),
           ChatScreen.id: (ctx) => ChatScreen(),
-          ProfileScreen.id: (ctx) => ProfileScreen()
+          ProfileScreen.id: (ctx) => ProfileScreen(),
+          AddFriendScreen.id:(ctx)=>AddFriendScreen()
         },
       ),
     );

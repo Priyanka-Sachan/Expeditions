@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/Models/Message.dart';
 import 'package:expeditions/Models/User.dart';
+import 'package:expeditions/UI/Screens/AddFriendScreen.dart';
 import 'package:expeditions/UI/Screens/ConversationScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
@@ -42,6 +43,22 @@ class _ChatScreenState extends State<ChatScreen> {
           'Chats',
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                // Navigator.of(context).pushNamed(AddPlaceScreen.id);
+                pushNewScreen(
+                  context,
+                  screen: AddFriendScreen(),
+                  withNavBar: false, // OPTIONAL VALUE. True by default.
+                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                );
+              },
+              icon: Icon(
+                Icons.add,
+                color: Theme.of(context).iconTheme.color,
+              ))
+        ],
       ),
       body: StreamBuilder(
           stream: _firestore
