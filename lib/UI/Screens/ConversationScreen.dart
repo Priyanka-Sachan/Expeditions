@@ -59,13 +59,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 child: SvgPicture.asset('assets/images/bug.svg',
                     semanticsLabel: 'Bug'));
           final messages = streamSnapshot.data!.docs;
-          if (messages.length == 0)
-            return Center(
-                child: SvgPicture.asset('assets/images/say_hi.svg',
-                    semanticsLabel: 'Empty conversation'));
+          // if (messages.length == 0)
+          //   return Center(
+          //       child: SvgPicture.asset('assets/images/say_hi.svg',
+          //           semanticsLabel: 'Empty conversation'));
           return Column(children: [
             Expanded(
-              child: ListView.builder(
+              child: (messages.length == 0)?
+              Center(
+                  child: SvgPicture.asset('assets/images/say_hi.svg',
+                      semanticsLabel: 'Empty conversation')):
+              ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (ctx, i) {
@@ -153,6 +157,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   ),
                   IconButton(
                       onPressed: () {
+                        if(messages.length==0)
+                          setChat(chatId,currentUser.uid,messenger.uid);
                         sendMessage(chatId, currentUser.uid);
                       },
                       icon: Icon(
@@ -166,6 +172,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
         },
       ),
     );
+  }
+
+  void setChat(String chatId, String user1,String user2){
+    _firestore.collection("chat").doc(chatId).set({'members':[user1,user2]});
   }
 
   void sendMessage(String chatId, String senderId) {

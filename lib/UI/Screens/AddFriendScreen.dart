@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeditions/Models/User.dart';
+import 'package:expeditions/UI/Screens/ConversationScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class AddFriendScreen extends StatefulWidget {
   static final id = 'add-friend-screen';
@@ -21,6 +23,12 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
     final uid = _firebaseAuth.currentUser!.uid;
     _user = await User.getUser(_firestore, uid);
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    getCurrentUser();
+    super.initState();
   }
 
   @override
@@ -56,7 +64,7 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
             return ListView(
                 children:
                 streamSnapshot.data!.docs.map((DocumentSnapshot document) {
-                      final data = document;
+                      final user=User(uid: document.id, username: document.get('username'), emailId: document.get('email'), imageUrl: document.get('imageUrl'));
                       return GestureDetector(
                           child: Card(
                             color: Theme.of(context).backgroundColor,
@@ -72,7 +80,7 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                                 children: [
                                   CircleAvatar(
                                     backgroundImage:
-                                    NetworkImage(data.get('imageUrl')),
+                                    NetworkImage(user.imageUrl),
                                     radius: 24,
                                   ),
                                   SizedBox(
@@ -83,7 +91,7 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          data.get('username'),
+                                          user.username,
                                           style: TextStyle(fontSize: 24),
                                         ),
                                       ],
@@ -94,23 +102,36 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                             ),
                           ),
                           onTap: () {
-                            // pushNewScreenWithRouteSettings(
-                            //   context,
-                            //   screen: ConversationScreen(),
-                            //   settings: RouteSettings(
-                            //       name: ConversationScreen.id,
-                            //       arguments: {
-                            //         'chat_id': document.id,
-                            //         'current_user': _user,
-                            //         'messenger': messenger
-                            //       }),
-                            //   withNavBar: false,
-                            //   pageTransitionAnimation:
-                            //   PageTransitionAnimation.cupertino,
-                            // );
+                            // print('!!!!!!!!!!!!!!!!!!!!!!!!!!!11111');
+                            // print(getChatId(_user.uid,data.id));
+                            pushNewScreenWithRouteSettings(
+                              context,
+                              screen: ConversationScreen(),
+                              settings: RouteSettings(
+                                  name: ConversationScreen.id,
+                                  arguments: {
+                                    'chat_id': getChatId(_user.uid,user.uid),
+                                    'current_user': _user,
+                                    'messenger': user
+                                  }),
+                              withNavBar: false,
+                              pageTransitionAnimation:
+                              PageTransitionAnimation.cupertino,
+                            );
                           });
                 }).toList());
           }),
     );
   }
+  String getChatId(String user1,String user2){
+    String chatId;
+    if(user1.compareTo(user2)==-1)
+      chatId=user1+'@'+user2;
+    else
+      chatId=user2+'@'+user1;
+    print('ChatId: '+chatId);
+    return chatId;
+  }
 }
+
+
